@@ -78,12 +78,13 @@ endef
 define Build/Compile
 	( \
 		pushd $(PKG_BUILD_DIR) ; \
-		wget https://downloads.openwrt.org/releases/$(PKG_BASE)/$(ARCH_PACKAGES)/packages/node_$(PKG_VERSION)_$(ARCH_PACKAGES).ipk ; \
-		$(TAR) -zxf node_$(PKG_VERSION)_$(ARCH_PACKAGES).ipk ; \
+		NODE_OP_SOURCE_VERSION=$(shell wget -qO- https://downloads.openwrt.org/releases/$(PKG_BASE)/$(ARCH_PACKAGES)/packages/Packages | sed -n 's/.*node_\(v[0-9]\+\.[0-9]\+\.[0-9]\+-[0-9]\+\)_x86_64\.ipk.*/\1/p') ; \
+		wget https://downloads.openwrt.org/releases/$(PKG_BASE)/$(ARCH_PACKAGES)/packages/node_$(NODE_OP_SOURCE_VERSION)_$(ARCH_PACKAGES).ipk ; \
+		$(TAR) -zxf node_$(NODE_OP_SOURCE_VERSION)_$(ARCH_PACKAGES).ipk ; \
 		$(TAR) -zxf data.tar.gz ; \
 		rm -f data.tar.gz control.tar.gz debian-binary ; \
-		wget https://downloads.openwrt.org/releases/$(PKG_BASE)/$(ARCH_PACKAGES)/packages/node-npm_$(PKG_VERSION)_$(ARCH_PACKAGES).ipk ; \
-		$(TAR) -zxf node-npm_$(PKG_VERSION)_$(ARCH_PACKAGES).ipk ; \
+		wget https://downloads.openwrt.org/releases/$(PKG_BASE)/$(ARCH_PACKAGES)/packages/node-npm_$(NODE_OP_SOURCE_VERSION)_$(ARCH_PACKAGES).ipk ; \
+		$(TAR) -zxf node-npm_$(NODE_OP_SOURCE_VERSION)_$(ARCH_PACKAGES).ipk ; \
 		$(TAR) -zxf data.tar.gz ; \
 		rm -f data.tar.gz control.tar.gz debian-binary ; \
 		popd ; \
