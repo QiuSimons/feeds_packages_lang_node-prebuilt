@@ -9,15 +9,16 @@ include $(TOPDIR)/rules.mk
 
 PKG_NAME:=node
 PKG_BASE:=packages-23.05
-PKG_VERSION:=$(shell curl -s https://downloads.openwrt.org/releases/$(PKG_BASE)/aarch64_generic/packages/ | grep node_v | grep -oP 'node_v\d+\.\d+\.\d+-\d+' | sed -n 's/node_//p' | head -n1)
-NODE_VERSION:=$(shell echo $(PKG_VERSION) | sed 's/-.*//')
+PKG_VERSION:=$(shell curl -s https://downloads.openwrt.org/releases/$(PKG_BASE)/aarch64_generic/packages/Packages | grep -oP '(?<=node_v)\d+\.\d+\.\d+-\d+')
+PKG_BUILD_VERSION:=$(shell curl -s https://downloads.openwrt.org/releases/$(PKG_BASE)/$(ARCH_PACKAGES)/packages/Packages | grep -oP '(?<=node_v)\d+\.\d+\.\d+-\d+')
+PKG_MAJOR_VERSION:=v$(shell echo $(PKG_BUILD_VERSION) | sed 's/-.*//')
 
 PKG_MAINTAINER:=Hirokazu MORIKAWA <morikw2@gmail.com>, Adrian Panella <ianchi74@outlook.com>
 PKG_LICENSE:=MIT
 PKG_LICENSE_FILES:=LICENSE
 PKG_CPE_ID:=cpe:/a:nodejs:node.js
 
-PKG_BUILD_DIR:=$(BUILD_DIR)/$(PKG_NAME)-$(PKG_VERSION)
+PKG_BUILD_DIR:=$(BUILD_DIR)/$(PKG_NAME)-$(PKG_BUILD_VERSION)
 
 include $(INCLUDE_DIR)/host-build.mk
 include $(INCLUDE_DIR)/package.mk
@@ -69,21 +70,22 @@ define Host/Compile
 	( \
 		pushd $(HOST_BUILD_DIR) ; \
 		$(RM) node-v* ; \
-		wget https://nodejs.org/dist/$(NODE_VERSION)/node-$(NODE_VERSION)-linux-$(NODE_ARCH).tar.xz ; \
-		$(TAR) -xf node-$(NODE_VERSION)-linux-$(NODE_ARCH).tar.xz ; \
+		wget https://nodejs.org/dist/$(PKG_MAJOR_VERSION)/node-$(PKG_MAJOR_VERSION)-linux-$(NODE_ARCH).tar.xz ; \
+		$(TAR) -xf node-$(PKG_MAJOR_VERSION)-linux-$(NODE_ARCH).tar.xz ; \
 		popd ; \
 	)
 endef
 
 define Build/Compile
 	( \
+		echo $(ARCH_PACKAGES) ; \
 		pushd $(PKG_BUILD_DIR) ; \
-		wget https://downloads.openwrt.org/releases/$(PKG_BASE)/$(ARCH_PACKAGES)/packages/node_$(PKG_VERSION)_$(ARCH_PACKAGES).ipk ; \
-		$(TAR) -zxf node_$(PKG_VERSION)_$(ARCH_PACKAGES).ipk ; \
+		wget https://downloads.openwrt.org/releases/$(PKG_BASE)/$(ARCH_PACKAGES)/packages/node_v$(PKG_BUILD_VERSION)_$(ARCH_PACKAGES).ipk ; \
+		$(TAR) -zxf node_v$(PKG_BUILD_VERSION)_$(ARCH_PACKAGES).ipk ; \
 		$(TAR) -zxf data.tar.gz ; \
 		rm -f data.tar.gz control.tar.gz debian-binary ; \
-		wget https://downloads.openwrt.org/releases/$(PKG_BASE)/$(ARCH_PACKAGES)/packages/node-npm_$(PKG_VERSION)_$(ARCH_PACKAGES).ipk ; \
-		$(TAR) -zxf node-npm_$(PKG_VERSION)_$(ARCH_PACKAGES).ipk ; \
+		wget https://downloads.openwrt.org/releases/$(PKG_BASE)/$(ARCH_PACKAGES)/packages/node-npm_v$(PKG_BUILD_VERSION)_$(ARCH_PACKAGES).ipk ; \
+		$(TAR) -zxf node-npm_v$(PKG_BUILD_VERSION)_$(ARCH_PACKAGES).ipk ; \
 		$(TAR) -zxf data.tar.gz ; \
 		rm -f data.tar.gz control.tar.gz debian-binary ; \
 		popd ; \
@@ -109,7 +111,7 @@ define Package/node-npm/install
 endef
 
 define Host/Install
-	$(CP) $(HOST_BUILD_DIR)/node-$(NODE_VERSION)-linux-$(NODE_ARCH)/* $(STAGING_DIR_HOST)/
+	$(CP) $(HOST_BUILD_DIR)/node-$(PKG_MAJOR_VERSION)-linux-$(NODE_ARCH)/* $(STAGING_DIR_HOST)/
 endef
 
 $(eval $(call HostBuild))
