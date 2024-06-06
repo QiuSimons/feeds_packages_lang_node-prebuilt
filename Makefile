@@ -78,7 +78,7 @@ endef
 define Build/Compile
 	( \
 		pushd $(PKG_BUILD_DIR) ; \
-		NODE_OP_SOURCE_VERSION=$(shell wget -qO- https://downloads.openwrt.org/releases/$(PKG_BASE)/$(ARCH_PACKAGES)/packages/Packages | sed -n 's/.*node_\(v[0-9]\+\.[0-9]\+\.[0-9]\+-[0-9]\+\)_x86_64\.ipk.*/\1/p') ; \
+		NODE_OP_SOURCE_VERSION=$(shell wget -qO- https://downloads.openwrt.org/releases/$(PKG_BASE)/$(ARCH_PACKAGES)/packages/Packages | sed -n "s/.*node_\(v[0-9]\+\.[0-9]\+\.[0-9]\+\(-[0-9]\+\)\?\)_$(ARCH_PACKAGES)\.ipk.*/\1/p") ; \
 		wget https://downloads.openwrt.org/releases/$(PKG_BASE)/$(ARCH_PACKAGES)/packages/node_$(NODE_OP_SOURCE_VERSION)_$(ARCH_PACKAGES).ipk ; \
 		$(TAR) -zxf node_$(NODE_OP_SOURCE_VERSION)_$(ARCH_PACKAGES).ipk ; \
 		$(TAR) -zxf data.tar.gz ; \
